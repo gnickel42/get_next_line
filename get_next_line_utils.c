@@ -60,7 +60,6 @@ char	*ft_strjoin(const char *s1, const char *s2)
 	return (0);
 }
 
-
 char	*ft_strdup(const char *s1)
 {
 	char	*dst;
