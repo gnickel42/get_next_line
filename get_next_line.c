@@ -6,75 +6,77 @@
 /*   By: gnickel <gnickel@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 10:40:11 by gnickel           #+#    #+#             */
-/*   Updated: 2024/12/18 16:06:31 by gnickel          ###   ########.fr       */
+/*   Updated: 2024/12/18 17:02:30 by gnickel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*join_ln(int nl, char **buf)
-{
-	char	*res;
-	char	*temp;
+#include <wctype.h>
 
-	temp = 0;
-	if (nl <= 0)
-	{
-		if (**buf == '\0')
-		{
-			free(*buf);
-			return (*buf = 0);
-		}
-		res = *buf;
-		*buf = 0;
-		return (res);
-	}
-	temp = ft_substr(*buf, nl, BUFFER_SIZE);
-	res = *buf;
-	res[nl] = 0;
-	*buf = temp;
-	return (res);
+static  char *update_carry(char *line, char *nl, char *carry)
+{
+	char *temp;
+	char *ret;
+	int i;
+
+	ret = malloc(nl - line + 1);
+	i = -1;
+	while (line + (++i) < nl)
+		ret[i] = line[i];
+	ret[i] = 0;
+	i = -1;
+	while (nl[++i])
+		carry[i] = nl[i];
+	carry[i] = 0;
+	return (free(line), ret);
 }
 
-char	*find_nl(int fd, char **buf, char *line)
+static  char *handle_eof()
 {
-	int		b_read;
-	char	*temp;
-	char	*nl;
 
-	nl = ft_strchr(*buf, '\n');
-	temp = 0;
-	b_read = 0;
-	while (nl == 0)
-	{
-		b_read = read(fd, line, BUFFER_SIZE);
-		if (b_read == 0)
-			break ;
-		if (b_read == -1)
-			return (0);
-		line[b_read] = 0;
-		temp = ft_strjoin(*buf, line);
-		free(*buf);
-		*buf = temp;
-		nl = ft_strchr(*buf, '\n');
-	}
-	return (join_ln(nl - *buf, buf));
+}
+
+static char *handle_start_carry()
+{
+
+}
+
+static char *helper_join(char *str1, char *str2)
+{
+	char *temp;
+	temp = ft_strjoin(str1, str2);
+	free(str1);
+	return (temp);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*buf;
-	char		*line;
-	char		*ret;
+	static  char carry[BUFFER_SIZE + 1] = {0};
+	char buffer[BUFFER_SIZE + 1] = {0};
+	char	*line;
+	ssize_t	b_read;
+	char *nl;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	line = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	line = handle_start_carry();
+	if (line)
+		return line;
+	line = ft_strdup("");
 	if (!line)
 		return (NULL);
-	if (!buf)
-		buf = ft_strdup("");
-	ret = find_nl(fd, &buf, line);
-	free(line);
-	return (ret);
+	nl = NULL;
+	while (!nl)
+	{
+		b_read = read(fd, buffer, BUFFER_SIZE);
+		if (b_read == 0)
+			return (handle_eof()) ;
+		if (b_read == -1)
+			return (free(line), NULL);
+		buffer[b_read] = 0;
+		line = helper_join(line, buffer);
+		nl = ft_strchr(line, '\n');
+	}
+	return (update_carry(line, nl, carry));
 }
