@@ -12,11 +12,8 @@
 
 #include "get_next_line.h"
 
-#include <wctype.h>
-
 static  char *update_carry(char *line, char *nl, char *carry)
 {
-	char *temp;
 	char *ret;
 	int i;
 
@@ -32,14 +29,32 @@ static  char *update_carry(char *line, char *nl, char *carry)
 	return (free(line), ret);
 }
 
-static  char *handle_eof()
+static  char *handle_eof(char *line)
 {
-
+	if (line && *line)
+		return (line);
+	return (free(line), NULL);
 }
 
-static char *handle_start_carry()
+static char *handle_start_carry(char *carry)
 {
+	char	*nl;
+	char	*line;
 
+	if (carry[0] == '\0')
+		return (NULL);
+	nl = ft_strchr(carry, '\n');
+	if (nl)
+	{
+		line = ft_substr(carry, 0, nl - carry + 1);
+		ft_strlcpy(carry, nl + 1, BUFFER_SIZE);
+	}
+	else
+	{
+		line = ft_strdup(carry);
+		carry[0] = '\0';
+	}
+	return (line);
 }
 
 static char *helper_join(char *str1, char *str2)
@@ -60,7 +75,7 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	line = handle_start_carry();
+	line = handle_start_carry(carry);
 	if (line)
 		return line;
 	line = ft_strdup("");
@@ -71,7 +86,7 @@ char	*get_next_line(int fd)
 	{
 		b_read = read(fd, buffer, BUFFER_SIZE);
 		if (b_read == 0)
-			return (handle_eof()) ;
+			return (handle_eof(line)) ;
 		if (b_read == -1)
 			return (free(line), NULL);
 		buffer[b_read] = 0;
