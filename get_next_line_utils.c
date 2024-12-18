@@ -97,3 +97,28 @@ size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize)
 		i++;
 	return (i);
 }
+
+char	*ft_substr(const char *s, unsigned int start, size_t len)
+{
+	char	*dst;
+	size_t	i;
+
+	i = 0;
+	if (start >= ft_strlen(s))
+		return (ft_strdup(""));
+	if (start + len > ft_strlen(s))
+		len = ft_strlen(s) - start;
+	dst = malloc(len + 1);
+	if (dst)
+	{
+		while (i < len && s[start])
+		{
+			dst[i] = s[start];
+			i++;
+			start++;
+		}
+		dst[i] = 0;
+		return (dst);
+	}
+	return (0);
+}
