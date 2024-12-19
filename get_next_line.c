@@ -17,18 +17,18 @@ static char	*update_carry(char *line, char *nl, char *carry)
 	char	*ret;
 	int		i;
 
-	ret = malloc(nl - line + 2);
+	ret = malloc(nl - line + 2 * sizeof(char));
 	if (!ret)
 		return (NULL);
 	i = -1;
 	while (line + (++i) < nl)
 		ret[i] = line[i];
-	ret[i] = '\n';
-	ret[i + 1] = 0;
+	ret[i++] = '\n';
+	ret[i] = '\0';
 	i = -1;
 	while (nl[++i] && i < BUFFER_SIZE)
-		carry[i] = nl[i];
-	carry[i] = 0;
+		carry[i - 1] = nl[i];
+	carry[i - 1] = '\0';
 	return (free(line), ret);
 }
 
