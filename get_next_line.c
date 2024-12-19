@@ -12,31 +12,34 @@
 
 #include "get_next_line.h"
 
-static  char *update_carry(char *line, char *nl, char *carry)
+static char	*update_carry(char *line, char *nl, char *carry)
 {
-	char *ret;
-	int i;
+	char	*ret;
+	int		i;
 
-	ret = malloc(nl - line + 1);
+	ret = malloc(nl - line + 2);
+	if (!ret)
+		return (NULL);
 	i = -1;
 	while (line + (++i) < nl)
 		ret[i] = line[i];
-	ret[i] = 0;
+	ret[i] = '\n';
+	ret[i + 1] = 0;
 	i = -1;
-	while (nl[++i])
+	while (nl[++i] && i < BUFFER_SIZE)
 		carry[i] = nl[i];
 	carry[i] = 0;
 	return (free(line), ret);
 }
 
-static  char *handle_eof(char *line)
+static char	*handle_eof(char *line)
 {
 	if (line && *line)
 		return (line);
 	return (free(line), NULL);
 }
 
-static char *handle_start_carry(char *carry)
+static char	*handle_start_carry(char *carry)
 {
 	char	*nl;
 	char	*line;
@@ -47,7 +50,7 @@ static char *handle_start_carry(char *carry)
 	if (nl)
 	{
 		line = ft_substr(carry, 0, nl - carry + 1);
-		ft_strlcpy(carry, nl + 1, BUFFER_SIZE);
+		ft_strlcpy(carry, nl + 1, BUFFER_SIZE + 1);
 	}
 	else
 	{
@@ -57,9 +60,10 @@ static char *handle_start_carry(char *carry)
 	return (line);
 }
 
-static char *helper_join(char *str1, char *str2)
+static char	*helper_join(char *str1, char *str2)
 {
-	char *temp;
+	char	*temp;
+
 	temp = ft_strjoin(str1, str2);
 	free(str1);
 	return (temp);
@@ -67,17 +71,17 @@ static char *helper_join(char *str1, char *str2)
 
 char	*get_next_line(int fd)
 {
-	static  char carry[BUFFER_SIZE + 1] = {0};
-	char buffer[BUFFER_SIZE + 1] = {0};
-	char	*line;
-	ssize_t	b_read;
-	char *nl;
+	static char	carry[BUFFER_SIZE + 1] = {0};
+	char		buffer[BUFFER_SIZE + 1];
+	char		*line;
+	ssize_t		b_read;
+	char		*nl;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	line = handle_start_carry(carry);
 	if (line)
-		return line;
+		return (line);
 	line = ft_strdup("");
 	if (!line)
 		return (NULL);
@@ -86,7 +90,7 @@ char	*get_next_line(int fd)
 	{
 		b_read = read(fd, buffer, BUFFER_SIZE);
 		if (b_read == 0)
-			return (handle_eof(line)) ;
+			return (handle_eof(line));
 		if (b_read == -1)
 			return (free(line), NULL);
 		buffer[b_read] = 0;
@@ -95,3 +99,28 @@ char	*get_next_line(int fd)
 	}
 	return (update_carry(line, nl, carry));
 }
+
+// #include <fcntl.h>
+// #include <stdio.h>
+//
+// int main(void)
+// {
+// 	int fd;
+// 	char *line;
+//
+// 	fd = open("test.txt", O_RDONLY);
+// 	if (fd == -1)
+// 	{
+// 		perror("Error opening file");
+// 		return (1);
+// 	}
+//
+// 	while ((line = get_next_line(fd)) != NULL)
+// 	{
+// 		printf("%s", line);
+// 		free(line);
+// 	}
+//
+// 	close(fd);
+// 	return (0);
+// }
