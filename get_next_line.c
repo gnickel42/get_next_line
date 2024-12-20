@@ -12,14 +12,14 @@
 
 #include "get_next_line.h"
 
-static char	*update_carry(char *line, char *nl, char *carry)
+static char	*update_carry(char *line, const char *nl, char *carry)
 {
 	char	*ret;
 	int		i;
 
 	ret = malloc((nl - line + 2) * sizeof(char));
 	if (!ret)
-		return (NULL);
+		return (free(line), NULL);
 	i = -1;
 	while (line + (++i) < nl)
 		ret[i] = line[i];
@@ -55,11 +55,13 @@ static char	*handle_start_carry(char *carry)
 	return (line);
 }
 
-static char	*helper_join(char *str1, char *str2)
+static char	*helper_join(char *str1, const char *str2)
 {
 	char	*temp;
 
 	temp = ft_strjoin(str1, str2);
+	if (!temp)
+		return (free(str1), NULL);
 	free(str1);
 	return (temp);
 }
@@ -96,7 +98,7 @@ char	*get_next_line(int fd)
 	static char	carry[BUFFER_SIZE + 1] = {0};
 	char		*line;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0)
 		return (NULL);
 	line = handle_start_carry(carry);
 	if (line && ft_strchr(line, '\n'))

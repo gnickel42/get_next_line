@@ -37,27 +37,22 @@ size_t	ft_strlen(const char *s)
 		i++;
 	return (i);
 }
-
 char	*ft_strjoin(const char *s1, const char *s2)
 {
 	char	*dst;
 	size_t	s1_len;
 	size_t	s2_len;
-	size_t	i;
 
-	s1_len = ft_strlen(s1) + 1;
-	s2_len = ft_strlen(s2) + 1;
-	dst = malloc(s1_len + s2_len - 1);
-	if (dst)
-	{
-		i = 0;
-		ft_strlcpy(dst, s1, s1_len);
-		while (dst[i] && i < s1_len + s2_len)
-			i++;
-		ft_strlcpy(&dst[i], s2, s2_len + 1);
-		return (dst);
-	}
-	return (0);
+	if (!s1 || !s2)
+		return (NULL);
+	s1_len = ft_strlen(s1);
+	s2_len = ft_strlen(s2);
+	dst = malloc(s1_len + s2_len + 1);
+	if (!dst)
+		return (NULL);
+	ft_strlcpy(dst, s1, s1_len + 1);
+	ft_strlcpy(dst + s1_len, s2, s2_len + 1);
+	return (dst);
 }
 
 char	*ft_strdup(const char *s1)
